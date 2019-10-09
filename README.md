@@ -20,6 +20,7 @@ const szamlazz = require('szamlazz.js')
 const szamlazzClient = new szamlazz.Client({
   user: 'USERNAME',
   password: 'PASSWORD',
+  agentKey: 'AGENT KEY',
   eInvoice: false, // create e-invoice. optional, default: false
   passpharase: '', // passpharase for e-invoice. optional
   requestInvoiceDownload: true, // downloads the issued pdf invoice. optional, default: false
@@ -112,6 +113,27 @@ let invoice = new szamlazz.Invoice({
 })
 ```
 
+### Create a credit item
+
+```javascript
+let creditItem = new Szamlazz.CreditItem({
+    itemDate: new Date(), // optional, default: new Date()
+    paymentMethod: Szamlazz.PaymentMethod.Cash, // optional, default: BankTransfer
+    amount: 5000, // amount paid, required
+    description: 'This is a test' // optional, default: ''
+  })
+```
+
+### Create a credit entry
+
+```javascript
+let creditEntry = new Szamlazz.CreditEntry({
+    additive: additive, // optional, default: false
+    invoiceId: invoiceId, // invoice number, required
+    items: [ creditItem ] // array of credit items, max. 5 items, required
+  })
+```
+
 To issue the invoice with szamlazz.hu:
 
 ```javascript
@@ -164,6 +186,28 @@ const invoice = await reverseInvoice({
   eInvoice: true, // create e-invoice
   requestInvoiceDownload: false, // downloads the issued pdf invoice
 })
+```
+
+### Register credit entry
+
+```javascript
+szamlazzClient.registerCreditEntry(creditEntry, (e, result) =>
+{
+  if (e) {
+    console.error(e.message, e.code) // handle errors
+    throw e;
+  }
+
+  if (result) {
+    //invoiceId
+    //netTotal
+    //grossTotal
+  }
+})
+//OR
+const registerCreditEntry = util.promisify(szamlazzClient.registerCreditEntry).bind(szamlazzClient)
+const response = await registerCreditEntry(creditEntry)
+
 ```
 
 ## Constants
