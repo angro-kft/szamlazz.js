@@ -4,8 +4,9 @@
  */
 exports.createClient = function (Szamlazz) {
   return new Szamlazz.Client({
-    user: 'USERNAME',
-    password: 'PASSWORD',
+    user: '',
+    password: '',
+    agentKey: '6vs3shap2c25c24ewr89evvmv798s75kb9a5snrfif',
     eInvoice: false,
     passpharase: '',
     requestInvoiceDownload: true,
@@ -101,6 +102,43 @@ exports.createInvoice = function (Szamlazz, seller, buyer, items) {
     language: Szamlazz.Language.Hungarian,
     seller: seller,
     buyer: buyer,
+    items
+  })
+}
+
+/**
+ * Create entry item 
+ * @return {EntryItem}
+ */
+exports.createEntryItem = function(Szamlazz){
+  return new Szamlazz.CreditItem({
+    itemDate: new Date(),
+    paymentMethod: Szamlazz.PaymentMethod.BankTransfer,
+    amount: 10000
+  })
+}
+
+/**
+ * Create entry item with description
+ * @return {EntryItem}
+ */
+exports.createEntryItemDesc = function(Szamlazz){
+  return new Szamlazz.CreditItem({
+    itemDate: new Date(),
+    paymentMethod: Szamlazz.PaymentMethod.Cash,
+    amount: 5000,
+    description: 'This is a test'
+  })
+}
+
+/**
+ * Create credit entry
+ * @return {CreditEntry}
+ */
+exports.createCreditEntry = function (Szamlazz, additive, invoiceId, items){
+  return new Szamlazz.CreditEntry({
+    additive: additive,
+    invoiceId: invoiceId,
     items
   })
 }
