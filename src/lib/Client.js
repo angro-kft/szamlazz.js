@@ -25,12 +25,11 @@ const defaultOptions = {
 class Client {
   constructor (options) {
     this._options = merge(defaultOptions, options || {})
+    const hasUserName = typeof this._options.user === 'string' && this._options.user.trim().length > 1
+    const hasPassword = typeof this._options.password === 'string' && this._options.password.trim().length > 1
+    const hasAgentKey = typeof this._options.agentKey === 'string' && this._options.agentKey.trim().length > 1
 
-    assert(typeof this._options.user === 'string' && this._options.user.trim().length > 1,
-      'Valid User field missing form client options')
-
-    assert(typeof this._options.password === 'string' && this._options.password.trim().length > 1,
-      'Valid Password field missing form client options')
+    assert(hasUserName && hasPassword || hasAgentKey, 'Either valid user field and Password OR valid agent key must be specified')
 
     this._cookieJar = request.jar()
   }
@@ -46,6 +45,7 @@ class Client {
       XMLUtils.wrapWithElement([
         [ 'felhasznalo', this._options.user ],
         [ 'jelszo', this._options.password ],
+        [ 'szamlaagentkulcs', this._options.agentKey],
         [ 'szamlaszam', options.invoiceId ],
         [ 'rendelesSzam', options.orderNumber ],
         [ 'pdf', options.pdf ]
@@ -76,6 +76,7 @@ class Client {
         'beallitasok', [
           [ 'felhasznalo', this._options.user ],
           [ 'jelszo', this._options.password ],
+          [ 'szamlaagentkulcs', this._options.agentKey],
           [ 'eszamla', String(options.eInvoice) ],
           [ 'szamlaLetoltes', String(options.requestInvoiceDownload) ],
       ]) +
@@ -92,6 +93,21 @@ class Client {
       'utf8',
       (httpResponse, cb) => {
           cb(httpResponse.body)
+      },
+      cb)
+  }
+
+  registerCreditEntry(creditEntry, cb){
+    this._sendRequest(
+      'action-szamla_agent_kifiz',
+      this._generateCreditEntryXML(creditEntry),
+      null,
+      (httpResponse, cb) => {
+        cb(null, {
+          invoiceId: httpResponse.headers.szlahu_szamlaszam,
+          netTotal: httpResponse.headers.szlahu_nettovegosszeg,
+          grossTotal: httpResponse.headers.szlahu_bruttovegosszeg
+        });
       },
       cb)
   }
@@ -120,6 +136,7 @@ class Client {
       XMLUtils.wrapWithElement('beallitasok', [
         [ 'felhasznalo', this._options.user ],
         [ 'jelszo', this._options.password ],
+        [ 'szamlaagentkulcs', this._options.agentKey],
         [ 'eszamla', this._options.eInvoice ],
         [ 'kulcstartojelszo', this._options.passpharase ],
         [ 'szamlaLetoltes', this._options.requestInvoiceDownload ],
@@ -129,6 +146,26 @@ class Client {
       invoice._generateXML(1) +
       xmlFooter
   }
+
+  _generateCreditEntryXML (creditEntry){
+    const entryHeader =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<xmlszamlakifiz xmlns="http://www.szamlazz.hu/xmlszamlakifiz" xmlns:xsi="http://www.w3.org/2001/XMLSchemainstance" ' +
+      '>\n'
+//xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlakifiz xmlszamlakifiz.xsd "
+    const entryFooter = '</xmlszamlakifiz>'
+    return entryHeader +
+      XMLUtils.wrapWithElement('beallitasok', [
+        [ 'felhasznalo', this._options.user ],
+        [ 'jelszo', this._options.password ],
+        [ 'szamlaagentkulcs', this._options.agentKey],
+        [ 'szamlaszam', creditEntry._getInvoiceId()],
+        [ 'additiv', String(creditEntry._getAdditive())]
+      ], 1) +
+      creditEntry._generateXML(1) +
+      entryFooter
+  }
+
 
   _sendRequest (fileFieldName, data, encoding, getResult, cb) {
     const formData = {}
