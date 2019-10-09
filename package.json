@@ -1,5 +1,5 @@
 {
-  "name": "szamlazz.js",
+  "name": "@angro/szamlazz.js",
   "version": "1.0.9",
   "description": "Integration module for the szamlazz.hu online invoice provider",
   "main": "index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ewngs/szamlazz.js"
+    "url": "https://github.com/angro-kft/szamlazz.js"
   },
   "author": "Elastic Wings Ltd.",
   "license": "MIT",
