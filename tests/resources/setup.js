@@ -107,6 +107,21 @@ exports.createInvoice = function (Szamlazz, seller, buyer, items) {
 }
 
 /**
+ * Create invoice with new c.o.d. payment method
+ * @return {Invoice}
+ */
+exports.createInvoiceCod = function (Szamlazz, seller, buyer, items) {
+  return new Szamlazz.Invoice({
+    paymentMethod: Szamlazz.PaymentMethod.Cod,
+    currency: Szamlazz.Currency.Ft,
+    language: Szamlazz.Language.Hungarian,
+    seller: seller,
+    buyer: buyer,
+    items
+  })
+}
+
+/**
  * Create entry item 
  * @return {EntryItem}
  */
@@ -126,6 +141,19 @@ exports.createEntryItemDesc = function(Szamlazz){
   return new Szamlazz.CreditItem({
     itemDate: new Date(),
     paymentMethod: Szamlazz.PaymentMethod.Cash,
+    amount: 5000,
+    description: 'This is a test'
+  })
+}
+
+/**
+ * Create entry item with c.o.d. payment method
+ * @return {EntryItem}
+ */
+exports.createEntryItemCod = function(Szamlazz){
+  return new Szamlazz.CreditItem({
+    itemDate: new Date(),
+    paymentMethod: Szamlazz.PaymentMethod.Cod,
     amount: 5000,
     description: 'This is a test'
   })

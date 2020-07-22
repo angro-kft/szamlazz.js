@@ -18,8 +18,10 @@ let buyer
 let soldItem1
 let soldItem2
 let invoice
+let invoiceCod
 let entryItem1
 let entryItem2
+let entryItem3
 let creditEntry
 
 let Szamlazz
@@ -43,9 +45,11 @@ beforeEach(function (done) {
   soldItem1 = setup.createSoldItemNet(Szamlazz)
   soldItem2 = setup.createSoldItemGross(Szamlazz)
   invoice = setup.createInvoice(Szamlazz, seller, buyer, [ soldItem1, soldItem2 ])
+  invoiceCod = setup.createInvoiceCod(Szamlazz, seller, buyer, [ soldItem1, soldItem2 ])
   entryItem1 = setup.createEntryItem(Szamlazz)
   entryItem2 = setup.createEntryItemDesc(Szamlazz)
-  creditEntry = setup.createCreditEntry(Szamlazz, false, "2016-139", [entryItem1, entryItem2 ])
+  entryItem3 = setup.createEntryItemCod(Szamlazz)
+  creditEntry = setup.createCreditEntry(Szamlazz, false, "2016-139", [entryItem1, entryItem2, entryItem3 ])
 
   done()
 })
@@ -83,6 +87,19 @@ describe('Client', function () {
         if (!err) {
           let xsd = xmljs.parseXmlString(data)
           let xml = xmljs.parseXmlString(client._generateInvoiceXML(invoice))
+          expect(xml.validate(xsd)).to.be.true
+          done()
+        }
+      })
+    })
+  })
+
+  describe('_generateInvoiceXML', function () {
+    it('should return valid XML with c.o.d. payment method', function (done) {
+      fs.readFile(path.join(__dirname, 'resources', 'xmlszamla.xsd'), function (err, data) {
+        if (!err) {
+          let xsd = xmljs.parseXmlString(data)
+          let xml = xmljs.parseXmlString(client._generateInvoiceXML(invoiceCod))
           expect(xml.validate(xsd)).to.be.true
           done()
         }
