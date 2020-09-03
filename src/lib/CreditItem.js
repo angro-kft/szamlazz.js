@@ -21,8 +21,8 @@ class CreditItem {
   }
 
   _generateXML (indentLevel) {
-    assert(this._options.itemDate instanceof Date,
-      'Valid Date field missing from item options')
+    assert(this._options.itemDate instanceof Date || typeof this._options.itemDate  == "string",
+    'Valid Date field missing from item options')
 
     assert(this._options.paymentMethod instanceof Constants.Interface.PaymentMethod,
       'Valid PaymentMethod field missing from item options')
